@@ -14,6 +14,7 @@ from transforms import roll_pitch_angles
 
 class DrawPoints(object):
     def __init__(self, scale=1, multi=False, num_points=100):
+        """ Draw detected point on left and right images and draw connecting lines to visualise disparity"""
         self.scale = scale
         self.multi = multi
 
@@ -95,6 +96,7 @@ class DrawPoints(object):
 
 class DrawLine(object):
     def __init__(self, scale=1, multi=False, num_points=100):
+        """ Draw detected points along inserter, and superimpose estimated line """
         self.scale = scale
         self.multi = multi
 
@@ -123,7 +125,7 @@ class DrawLine(object):
         image_points = np.copy(image)
 
         x1, y1 = points[0, 0], points[0, 1]
-        x2, y2 = points[4, 0], points[4, 1]
+        x2, y2 = points[-1, 0], points[-1, 1]
         
         if (not m.isnan(x1)) and (not m.isnan(y1)):
             cv2.circle(
@@ -170,6 +172,7 @@ class DrawLine(object):
 
 class DrawAngles(object):
     def __init__(self, multi=False):
+        """ Calculate the roll and pitch of inserter, and display angle in degrees """
         self.multi = multi
 
         self.font = cv2.FONT_HERSHEY_SIMPLEX
