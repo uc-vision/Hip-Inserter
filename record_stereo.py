@@ -26,7 +26,6 @@ def record(dirpath_root, num_seconds):
         exit(1)
 
     runtime_parameters = sl.RuntimeParameters()
-    runtime_parameters.sensing_mode = sl.SENSING_MODE.STANDARD  # Use STANDARD sensing mode
 
     date_str = datetime.today().strftime('%Y%m%d_%H%M%S')
     dirpath_record = os.path.join(dirpath_root, date_str)
@@ -40,7 +39,7 @@ def record(dirpath_root, num_seconds):
 
     # Get stereo camera params
     info = zed.get_camera_information()
-    left_cam = info.calibration_parameters.left_cam
+    left_cam = info.camera_configuration.calibration_parameters.left_cam
 
     # Save params in json file
     stereo_cam = {}
@@ -48,7 +47,7 @@ def record(dirpath_root, num_seconds):
     stereo_cam['fy'] = left_cam.fy
     stereo_cam['cx'] = left_cam.cx
     stereo_cam['cy'] = left_cam.cy
-    stereo_cam['baseline'] = info.calibration_parameters.T[0].item()
+    stereo_cam['baseline'] = info.camera_configuration.calibration_parameters.stereo_transform[0, 3]
     params_path = os.path.join(dirpath_record, "params.json")
     with open(params_path, 'w') as file:
         json.dump(stereo_cam, file)

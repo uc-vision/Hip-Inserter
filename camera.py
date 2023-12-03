@@ -24,20 +24,19 @@ class Camera(object):
             exit(1)
 
         self.runtime_parameters = sl.RuntimeParameters()
-        self.runtime_parameters.sensing_mode = sl.SENSING_MODE.STANDARD  # Use STANDARD sensing mode
 
         self.image_left = sl.Mat()
         self.image_right = sl.Mat()
 
         info = self.zed.get_camera_information()
-        left_cam = info.calibration_parameters.left_cam
+        left_cam = info.camera_configuration.calibration_parameters.left_cam
         self.intrinsics = np.eye(3)
         self.intrinsics[0, 0] = left_cam.fx
         self.intrinsics[1, 1] = left_cam.fy
         self.intrinsics[0, 2] = left_cam.cx
         self.intrinsics[1, 2] = left_cam.cy
 
-        self.baseline = self.zed.get_camera_information().calibration_parameters.T[0]
+        self.baseline = self.zed.get_camera_information().camera_configuration.calibration_parameters.stereo_transform[0, 3]
 
     def __call__(self):
         if self.zed.grab(self.runtime_parameters) == sl.ERROR_CODE.SUCCESS:

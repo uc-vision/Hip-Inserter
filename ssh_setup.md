@@ -27,7 +27,7 @@
  3. Add the following to ~/.ssh/config (Hostname is the gate server public ip)
  ```
  Host gateway
-    HostName             170.64.176.78
+    HostName             170.64.189.106
     User                 root
     RemoteForward        2222 localhost:22
     ExitOnForwardFailure yes
@@ -42,9 +42,9 @@
  ```
  ssh gateway
  ```
- 6. With the ssh connection running on the target computer, you should be able to ssh in from an external computer, through the gateway server into the target computer. Note: `user` is the target computer username, `170.64.176.78` is the gateway server public ip, and `2222` is the exposed port on the gateway server.
+ 6. With the ssh connection running on the target computer, you should be able to ssh in from an external computer, through the gateway server into the target computer. Note: `user` is the target computer username, `170.64.189.106` is the gateway server public ip, and `2222` is the exposed port on the gateway server.
  ```
- ssh user@170.64.176.78 -p 2222
+ ssh user@170.64.189.106 -p 2222
  ```
 
 ### AutoSSH

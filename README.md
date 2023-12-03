@@ -6,26 +6,32 @@ The goal of this project is to estimate the angles/orientation of a orthopaedic 
 ## Install
 To install this project we recommend creating a conda enviroment. 
 
-`conda create -n hip-inserter python=3.9`
-
-`conda activate hip-inserter`
-
 Note: To avoid dependencies version issues, use the installation order provided below.
 
+### Operating System
+These instructions are tested, and assume the Ubuntu 22.04 operating system.
+
+### Nvidia Driver
+The following cuda version pairs with the NVIDIA Driver 535. Install with the following command
+
+`sudo apt install nvidia-driver-535`
+
 ### CUDA
-CUDA is required to operate the ZED camera, and the run this project in realtime. We recommend [CUDA 11.7](https://developer.nvidia.com/cuda-11-7-1-download-archive)
-
-### ZED
-We use the ZED Camera and it's SDK (version 3.8) for this project. Instructions for installing this can be found [here](https://www.stereolabs.com/developers/release/3.8/)
-
-The python bindings can then be installed with the following line
-
-`python /usr/local/zed/get_python_api.py`
+CUDA is required to operate the ZED camera, and the run this project in realtime. We recommend [CUDA 12.2](https://developer.nvidia.com/cuda-12-2-0-download-archive)
 
 ### SLEAP
 SLEAP is a full framework for labeling, training, and infering pose of animals via keypoint detection. We we are not working with animals, we find that this works as a general keypoint detector, while being easy to work with. The following link provides instructions on using this framework [SLEAP](https://sleap.ai/)
 
-`pip install sleap`
+`conda create -y -n hipinserter -c conda-forge -c nvidia -c sleap -c anaconda sleap=1.3.3`
+
+`conda activate hipinserter`
+
+### ZED
+We use the ZED Camera and it's SDK (version 3.8) for this project. Instructions for installing this can be found [here](https://www.stereolabs.com/developers/release/)
+
+The python bindings can then be installed with the following line
+
+`python /usr/local/zed/get_python_api.py`
 
 ### Other Dependencies
 
