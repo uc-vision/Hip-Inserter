@@ -23,10 +23,10 @@ class DrawPoints(object):
             color = [random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)]
             self.colors.append(color)
 
-        self.conn1, self.conn2 = Pipe()
+        # self.conn1, self.conn2 = Pipe()
 
-        self.p = Process(target=self.process_loop, args=())
-        self.p.start()
+        # self.p = Process(target=self.process_loop, args=())
+        # self.p.start()
 
     def process_loop(self):
         while True:
@@ -105,10 +105,10 @@ class DrawLine(object):
             color = [random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)]
             self.colors.append(color)
 
-        self.conn1, self.conn2 = Pipe()
+        # self.conn1, self.conn2 = Pipe()
 
-        self.p = Process(target=self.process_loop, args=())
-        self.p.start()
+        # self.p = Process(target=self.process_loop, args=())
+        # self.p.start()
 
     def process_loop(self):
         while True:

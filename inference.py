@@ -13,4 +13,6 @@ class Inference(object):
         out = self.model.inference_model(image_batch)
         points = out["instance_peaks"].numpy()[:, 0, :, :]  # [Batch, Points, 2]
         points_left, points_right = points[0], points[1]  # [Points, 2]
+        points_left = points_left[:5, :]  # only use 5 points on rod
+        points_right = points_right[:5, :]  # only use 5 points on rod
         return points_left, points_right
