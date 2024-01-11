@@ -116,27 +116,50 @@ class Buffer(object):
         return self.output()
 
     def update(self, value, t):
-        if np.isnan(value):
+        if np.isnan(value).any():
             return
         self.values = np.concatenate([np.array([value]), self.values], axis=0)
         self.times = np.concatenate([np.array([t]), self.times])
 
     def discard(self, t):
+        if self.values.shape[0] == 0:
+            return
         time_mask = (t - self.times) <= self.time_delta_max
-        time_mask_broadcast = np.broadcast(time_mask[:, None], self.values.shape)
-        self.values = self.values[time_mask_broadcast]
+        time_mask_broadcast = np.broadcast_to(time_mask[:, None], self.values.shape)
+        self.values = np.reshape(self.values[time_mask_broadcast], [np.sum(time_mask), 2])
         self.times = self.times[time_mask]
         
+        if self.values.shape[0] == 0:
+            return
         pixel_mask = np.linalg.norm(self.values[0, None, :] - self.values, axis=1) <= self.pixel_delta_max
-        pixel_mask_broadcast = np.broadcast(pixel_mask[:, None], self.values.shape)
-        self.values = self.values[pixel_mask]
-        self.times = self.times[pixel_mask_broadcast]
+        pixel_mask_broadcast = np.broadcast_to(pixel_mask[:, None], self.values.shape)
+        self.values = np.reshape(self.values[pixel_mask_broadcast], [np.sum(pixel_mask), 2])
+        self.times = self.times[pixel_mask]
+
+    def count_nans(self, points):
+        return np.sum(~np.isnan(np.mean(points, axis=1)))
 
     def output(self):
-        if len(self.values) == 0:
-            return np.nan
-        return np.mean(self.values)
+        if self.values.shape[0] == 0:
+            output = np.zeros([1, 2])
+            output[...] = np.nan
+            return output
+        return np.nanmean(self.values, axis=0)
     
+
+class Buffers(object):
+    def __init__(self, time_delta_max, pixel_delta_max, num_buffers):
+        self.num_buffers = num_buffers
+        self.buffers = []
+        for i in range(num_buffers):
+            self.buffers.append(Buffer(time_delta_max, pixel_delta_max))
+
+    def __call__(self, values, t):
+        outputs = np.zeros([self.num_buffers, 2])
+        for i in range(self.num_buffers):
+            outputs[i, :] = self.buffers[i](values[i], t)
+        return outputs
+
 
 class GeometryCheck(object):
     def __init__(self, distance_delta_max):
@@ -208,3 +231,30 @@ class Points2Vector(object):
         return self.current
     
 
+class DepthEstimate(object):
+    def __init__(self, point_idx):
+        self.point_idx = point_idx
+        self.current = False
+        self.depth = np.nan
+        self.depth_pixel = np.zeros(2)
+        self.depth_pixel[...] = np.nan
+
+    def __call__(self, points_3d, points_left):
+        if np.isnan(points_3d[self.point_idx, :]).any():
+            self.current = False
+        else:
+            self.current = True
+            self.update(points_3d, points_left)
+        return self.get_depth()
+
+        
+    def update(self, points_3d, points_left):
+        self.depth = points_3d[self.point_idx, 2]
+        self.depth_pixel = points_left[self.point_idx, :]
+
+    def get_depth(self):
+        return self.depth, self.depth_pixel
+
+    def get_current(self):
+        return self.current
+        

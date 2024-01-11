@@ -16,18 +16,27 @@ from processing import Points2Vector
 from processing import Buffer, Buffers
 from processing import DepthEstimate
 
-from visualise import DrawVector, DrawDepth, DrawValues
+from visualise import DrawVector, DrawDepth
 
 from camera import Recording
 from inference import Inference
 from transforms import Project, roll_pitch_angles
 
 
+def closest_point_vector(q, v1, v2):
+    ''' calculate interpolated 't' value along vector between points v1 and v2 '''
+    n = (v1[0] - q[:, 0])*(v2[0] - v1[0]) + (v1[1] - q[:, 1])*(v2[1] - v1[1]) + (v1[2] - q[:, 2])*(v2[2] - v1[2])
+    d = (v2[0] - v1[0])**2 + (v2[1] - v1[1])**2 + (v2[2] - v1[2])**2
+    t = -n / d
+    return t
+
+
 if __name__ == "__main__":
 
     model_filepath = "./models/sleap_projects/models/7-points-3230831_174033.single_instance.n=300"
 
-    camera = Recording("./data/collection/20240107_183743")
+    # camera = Recording("./data/collection/20240107_183743")
+    camera = Recording("./data/collection/20240107_183830")
 
     inference = Inference(model_filepath)
     project = Project(
@@ -48,16 +57,19 @@ if __name__ == "__main__":
 
     roll_moving_avg = MovingAvg(0.2)
     pitch_moving_avg = MovingAvg(0.5)
-    depth_moving_avg = MovingAvg(0.5)
 
     draw_vector = DrawVector(project, 500)
-    depth_estimate = DepthEstimate(2)
-    draw_depth = DrawDepth()
-    draw_values = DrawValues()
+
+    depth_estimate = DepthEstimate()
+
+    draw_depth = DrawDepth(project)
+
+    num_points = 5
+
+    dists = np.zeros([len(camera), num_points, num_points])
 
     for i in tqdm(range(len(camera))):
         image_left, image_right = camera()
-        image_left_out = np.copy(image_left)
 
         t = camera.get_time()
 
@@ -75,25 +87,23 @@ if __name__ == "__main__":
         points_3d = geometry_check(points_3d)
 
         mean, vector = points_2_vector(points_3d)
-        vector_current = points_2_vector.get_current()
-        roll, pitch = roll_pitch_angles(vector)
-        roll = roll_moving_avg(roll, t)
-        pitch = pitch_moving_avg(pitch, t)
+        current = points_2_vector.get_current()
 
-        image_left_out = draw_vector(image_left_out, mean, vector, vector_current)
+        vector_norm = vector / np.linalg.norm(vector)
 
-        depth, depth_pixel = depth_estimate(points_3d, points_left)
-        depth_current = depth_estimate.get_current()
-        depth = depth_moving_avg(depth, t)
+        v1 = mean
+        v2 = mean + vector_norm
 
-        image_left_out = draw_depth(image_left_out, depth_pixel, depth_current)
-        image_values = draw_values(roll, pitch, depth, vector_current, depth_current)
-        image_out = np.concatenate([image_left_out, image_values], axis=1)
-        image_out = cv2.cvtColor(image_out, cv2.COLOR_BGR2RGB)
-        
-        cv2.imshow("image", image_out)
-        cv2.waitKey(1)
+        t = closest_point_vector(points_3d, v1, v2)
 
+        # t = np.zeros(num_points)
 
+        # for j in range(num_points):
+        #     print(points_3d[j].shape, v1.shape, v2.shape)
+        #     t[j] = closest_point_vector(points_3d[j], v1, v2)
 
+        dists[i] = t[:, None] - t[None, :]
 
+    dists_avg = np.nanmedian(dists, axis=0)
+
+    print(dists_avg)
