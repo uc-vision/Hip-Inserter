@@ -27,8 +27,6 @@ from transforms import Project, roll_pitch_angles
 @hydra.main(version_base=None, config_path="./configs", config_name="config")
 def run(cfg):
 
-    # model_filepath = "./models/sleap_projects/models/7-points-3230831_174033.single_instance.n=300"
-
     if cfg.camera is True:
         pass
     else:
@@ -39,24 +37,33 @@ def run(cfg):
         baseline=camera.baseline,
     )
 
-    buffer_left = Buffers(0.2, 2, 5)
-    buffer_right = Buffers(0.2, 2, 5)
+    buffer_left = Buffers(
+        cfg.buffers.time_delta_max,
+        cfg.buffers.pixel_delta_max,
+        cfg.buffers.num_buffers)
+    buffer_right = Buffers(
+        cfg.buffers.time_delta_max,
+        cfg.buffers.pixel_delta_max,
+        cfg.buffers.num_buffers)
 
-    horozontal_check = HorozontalCheck(2)
-    principle_axis_var_check = PrincipleAxisVarCheck(0.001, 3)
+    horozontal_check = HorozontalCheck(
+        cfg.horozontal_check.pixel_delta_max)
+    principle_axis_var_check = PrincipleAxisVarCheck(
+        cfg.principle_axis_var_check.var_max, 
+        cfg.principle_axis_var_check.points_min)
 
-    distance_check = DistanceCheck(0.1)
-    geometry_check = GeometryCheck(0.02)
+    distance_check = DistanceCheck(cfg.distance_check.distance_min)
+    geometry_check = GeometryCheck(cfg.geometry_check.distance_delta_max)
 
     points_2_vector = Points2Vector()
 
-    roll_moving_avg = MovingAvg(0.2)
-    pitch_moving_avg = MovingAvg(0.5)
-    depth_moving_avg = MovingAvg(0.5)
+    roll_moving_avg = MovingAvg(cfg.moving_average.roll)
+    pitch_moving_avg = MovingAvg(cfg.moving_average.pitch)
+    depth_moving_avg = MovingAvg(cfg.moving_average.depth)
 
-    depth_estimate = DepthEstimate(2)
+    depth_estimate = DepthEstimate(cfg.depth_estimate.points_idx)
 
-    draw_vector = DrawVector(project, 500)
+    draw_vector = DrawVector(project, cfg.draw_vector.n_points)
     draw_depth = DrawDepth()
     draw_values = DrawValues()
 

@@ -11,7 +11,13 @@ hydra:
 
 model_filepath: "./models/sleap_projects/models/7-points-3230831_174033.single_instance.n=300"
 
-camera_filepath: null
+# camera: True
+# camera: "./data/collection/20240107_183340"
+# camera: "./data/collection/20240107_183449"
+# camera: "./data/collection/20240107_183743"
+# camera: "./data/collection/20240107_183830"
+# camera: "./data/collection/20240107_183916"
+camera: "./data/collection/20240107_183955"
 
 buffers:
   time_delta_max: 0.2

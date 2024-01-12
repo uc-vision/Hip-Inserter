@@ -10,7 +10,6 @@ from tqdm import tqdm
 from sklearn import datasets, decomposition
 from time import time
 
-from visualizers import DrawPoints, DrawLine, DrawAngles
 from camera import Recording
 from inference import Inference
 from transforms import Project, roll_pitch_angles
