@@ -1,0 +1,43 @@
+defaults:  
+  - _self_  
+  - override hydra/hydra_logging: disabled  
+  - override hydra/job_logging: disabled  
+  
+hydra:  
+  output_subdir: null  
+  run:  
+    dir: .
+
+
+model_filepath: "./models/sleap_projects/models/7-points-3230831_174033.single_instance.n=300"
+
+camera_filepath: null
+
+buffers:
+  time_delta_max: 0.2
+  pixel_delta_max: 2
+  num_buffers: 5
+
+horozontal_check:
+  pixel_delta_max: 2
+
+principle_axis_var_check:
+  var_max: 0.001
+  points_min: 3
+
+distance_check:
+  distance_min: 0.1
+
+geometry_check:
+  distance_delta_max: 0.02
+
+moving_average:
+  roll: 0.2
+  pitch: 0.5
+  depth: 0.5
+
+depth_estimate:
+  points_idx: 2
+
+draw_vector:
+  n_points: 500

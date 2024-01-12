@@ -96,12 +96,6 @@ if __name__ == "__main__":
 
         t = closest_point_vector(points_3d, v1, v2)
 
-        # t = np.zeros(num_points)
-
-        # for j in range(num_points):
-        #     print(points_3d[j].shape, v1.shape, v2.shape)
-        #     t[j] = closest_point_vector(points_3d[j], v1, v2)
-
         dists[i] = t[:, None] - t[None, :]
 
     dists_avg = np.nanmedian(dists, axis=0)
