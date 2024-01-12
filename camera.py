@@ -66,6 +66,7 @@ class Recording(object):
         self.right_cap = cv2.VideoCapture(right_filepath)
 
         self.fps = self.left_cap.get(cv2.CAP_PROP_FPS)
+        self.num_frames = self.left_cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
         json_filepath = os.path.join(dirpath, 'params.json')
         with open(json_filepath, 'r') as file:
@@ -86,6 +87,9 @@ class Recording(object):
         return int(self.left_cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     def __call__(self):
+
+        if self.iter >= self.num_frames:
+            return None, None
 
         left_ret, left_frame = self.left_cap.read()
         right_ret, right_frame = self.right_cap.read()

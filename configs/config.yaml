@@ -47,3 +47,6 @@ depth_estimate:
 
 draw_vector:
   n_points: 500
+
+show_output: True
+record_output: "/home/casey/Videos/output_test.mp4"

@@ -77,6 +77,6 @@ def record(dirpath_root, num_seconds):
 
 if __name__ == "__main__":
     dirpath_root = "./data/collection"
-    num_seconds = 10
+    num_seconds = 20
 
     record(dirpath_root, num_seconds)

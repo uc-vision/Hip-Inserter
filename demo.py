@@ -67,9 +67,15 @@ def run(cfg):
     draw_depth = DrawDepth()
     draw_values = DrawValues()
 
-    for i in tqdm(range(len(camera))):
+    if cfg.record_output is not None:
+        fourcc = cv2.VideoWriter_fourcc(*'h264')
+        cap = cv2.VideoWriter(cfg.record_output, fourcc, 20.0, (1280+360, 720))
+
+    while True:
         # Images and time from camera
         image_left, image_right = camera()
+        if image_left is None or image_right is None:
+            return
         t = camera.get_time()
 
         # 2D points inference, and processing
@@ -104,9 +110,21 @@ def run(cfg):
         image_out = np.concatenate([image_left_out, image_values], axis=1)
         image_out = cv2.cvtColor(image_out, cv2.COLOR_BGR2RGB)
 
-        # Show visualisation
-        cv2.imshow("image", image_out)
-        cv2.waitKey(1)
+        # Visualisation Output
+        if cfg.show_output:
+            cv2.imshow("image", image_out)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        if cfg.record_output is not None:
+            cap.write(np.ascontiguousarray(image_out))
+
+    if cfg.show_output:
+        cv2.destroyAllWindows()
+    if cfg.record_output is not None:
+        cap.release()
+
+    
+
 
 
 if __name__ == "__main__":
