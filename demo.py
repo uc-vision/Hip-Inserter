@@ -10,7 +10,6 @@ from tqdm import tqdm
 from processing import HorozontalCheck
 from processing import PrincipleAxisVarCheck
 from processing import MovingAvg
-from processing import Buffer
 from processing import DistanceCheck
 from processing import GeometryCheck
 from processing import Points2Vector

@@ -18,6 +18,8 @@ from time import time
 #         self.init_params.camera_resolution = sl.RESOLUTION.HD720
 #         self.init_params.camera_fps = 30
 
+#         self.fps = 30
+
 #         # Open the camera
 #         err = self.zed.open(self.init_params)
 #         if err != sl.ERROR_CODE.SUCCESS:
@@ -38,20 +40,26 @@ from time import time
 
 #         self.baseline = self.zed.get_camera_information().camera_configuration.calibration_parameters.stereo_transform[0, 3]
 
+#         self.t0 = time()
+#         self.iter = 0
+
 #     def __call__(self):
 #         if self.zed.grab(self.runtime_parameters) == sl.ERROR_CODE.SUCCESS:
 #             self.zed.retrieve_image(self.image_left, sl.VIEW.LEFT)
 #             self.zed.retrieve_image(self.image_right, sl.VIEW.RIGHT)
 
 #             image_left_np = cv2.cvtColor(self.image_left.get_data()[:, :, :3], cv2.COLOR_RGB2BGR)
-#             # image_left_np = self.image_left.get_data()[:, :, :3]
 #             image_right_np = cv2.cvtColor(self.image_right.get_data()[:, :, :3], cv2.COLOR_RGB2BGR)
-#             # image_right_np = self.image_right.get_data()[:, :, :3]
 
 #             image_left_np = np.ascontiguousarray(image_left_np)
 #             image_right_np = np.ascontiguousarray(image_right_np)
 
+#             self.iter += 1
+
 #             return image_left_np, image_right_np
+        
+#     def get_time(self):
+#         return time() - self.t0
         
 
 class Recording(object):
@@ -107,8 +115,6 @@ class Recording(object):
         image_left_np = np.ascontiguousarray(image_left_np)
         image_right_np = np.ascontiguousarray(image_right_np)
 
-        # while time() - self.time < 1 / self.fps:
-        #     continue
         self.iter += 1
 
         return image_left_np, image_right_np
