@@ -51,8 +51,10 @@ def run(cfg):
         cfg.principle_axis_var_check.var_max, 
         cfg.principle_axis_var_check.points_min)
 
+    geometry_check = GeometryCheck(
+        cfg.geometry_check.distance_delta_max,
+        cfg.geometry_check.points_min)
     distance_check = DistanceCheck(cfg.distance_check.distance_min)
-    geometry_check = GeometryCheck(cfg.geometry_check.distance_delta_max)
 
     points_2_vector = Points2Vector()
 
@@ -66,9 +68,9 @@ def run(cfg):
     draw_depth = DrawDepth()
     draw_values = DrawValues()
 
-    if cfg.record_output is not None:
+    if cfg.record.output is not None:
         fourcc = cv2.VideoWriter_fourcc(*'h264')
-        cap = cv2.VideoWriter(cfg.record_output, fourcc, 20.0, (1280+360, 720))
+        cap = cv2.VideoWriter(cfg.record.output, fourcc, cfg.record.fps, (1280+360, 720))
 
     while True:
         # Images and time from camera
@@ -86,20 +88,27 @@ def run(cfg):
 
         # 3D points projection and processing
         points_3d = project.project(points_left, points_right)
-        points_3d = distance_check(points_3d)
         points_3d = geometry_check(points_3d)
+        points_3d = distance_check(points_3d)
 
         # Angles processing
         mean, vector = points_2_vector(points_3d)
         vector_current = points_2_vector.get_current()
         roll, pitch = roll_pitch_angles(vector)
-        roll = roll_moving_avg(roll, t)
-        pitch = pitch_moving_avg(pitch, t)
+        if vector_current:
+            roll = roll_moving_avg(roll, t)
+            pitch = pitch_moving_avg(pitch, t)
+        else:
+            roll = roll_moving_avg(np.nan, t)
+            pitch = pitch_moving_avg(np.nan, t)
 
         # Depth processing
         depth, depth_pixel = depth_estimate(points_3d, points_left)
         depth_current = depth_estimate.get_current()
-        depth = depth_moving_avg(depth, t)
+        if depth_current:
+            depth = depth_moving_avg(depth, t)
+        else:
+            depth = depth_moving_avg(np.nan, t)
 
         # Visualisation processing
         image_left_out = np.copy(image_left)
@@ -114,12 +123,12 @@ def run(cfg):
             cv2.imshow("image", image_out)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-        if cfg.record_output is not None:
+        if cfg.record.output is not None:
             cap.write(np.ascontiguousarray(image_out))
 
     if cfg.show_output:
         cv2.destroyAllWindows()
-    if cfg.record_output is not None:
+    if cfg.record.output is not None:
         cap.release()
 
     

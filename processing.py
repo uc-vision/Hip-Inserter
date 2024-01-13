@@ -1,3 +1,4 @@
+from typing import Any
 import numpy as np
 
 from sklearn import  decomposition
@@ -9,6 +10,26 @@ def reduce_to_nonan_array(array):
     mask = np.broadcast_to(mask, array_.shape)
     array_sub = np.reshape(array_[mask], (np.sum(mask[:, 0]), array_.shape[1]))
     return array_sub
+
+
+# def number_to_bool_array(number):
+
+
+def combination_masks(num_bools, min_true):
+    masks = []
+    for i in range(num_bools, min_true-1, -1):
+        for j in range(2**num_bools):
+            b = format(j, f'0{num_bools}b')
+            mask = np.zeros(num_bools, bool)
+            for k in range(num_bools):
+                mask[k] = int(b[k])
+            if np.sum(mask) == i:
+                masks.append(mask)
+    # masks = np.stack(masks, axis=0)
+    return masks
+
+# if __name__ == "__main__":
+#     combination_masks(5, 3)
 
 
 class HorozontalCheck(object):
@@ -38,16 +59,16 @@ class PrincipleAxisVarCheck(object):
         self.var_max = var_max
         self.points_min = points_min
 
-    def __call__(self, points):
+    def single(self, points, mask):
         points_ = np.copy(points)
+        for i in range(mask.shape[0]):
+            if not mask[i]:
+                points_[i, :] = np.nan
 
-        if self.count_nans(points_) < self.points_min:
+        if self.count_notnans(points_) < self.points_min:
             points_[...] = np.nan
             return points_
-        
-        # mask = ~np.isnan(np.mean(points, axis=1))[:, None]
-        # mask = np.broadcast_to(mask, points_.shape)
-        # points_sub = np.reshape(points_[mask], (np.sum(mask[:, 0]), points_.shape[1]))
+
         points_sub = reduce_to_nonan_array(points_)
 
         pca = decomposition.PCA(2)
@@ -58,6 +79,33 @@ class PrincipleAxisVarCheck(object):
             return points_
         
         return points_
+    
+    def __call__(self, points):
+        masks = combination_masks(5, self.points_min)
+        for mask in masks:
+            points_ = self.single(points, mask)
+            if self.count_notnans(points_) >= self.points_min:
+                return points_
+        points_[...] = np.nan
+        return points_
+
+    # def __call__(self, points):
+    #     points_ = np.copy(points)
+
+    #     if self.count_notnans(points_) < self.points_min:
+    #         points_[...] = np.nan
+    #         return points_
+        
+    #     points_sub = reduce_to_nonan_array(points_)
+
+    #     pca = decomposition.PCA(2)
+    #     pca.fit(points_sub)
+
+    #     if pca.explained_variance_ratio_[1] > self.var_max:
+    #         points_[...] = np.nan
+    #         return points_
+        
+    #     return points_
 
     def both(self, points_left, points_right):
         points_left_ = self(points_left)
@@ -69,7 +117,7 @@ class PrincipleAxisVarCheck(object):
 
         return points_left_, points_right_
 
-    def count_nans(self, points):
+    def count_notnans(self, points):
         return np.sum(~np.isnan(np.mean(points, axis=1)))
     
 
@@ -81,13 +129,12 @@ class MovingAvg(object):
         self.times = np.zeros([0])
 
     def __call__(self, value, t):
-        self.update(value, t)
-        self.discard(t)
+        if not np.isnan(value):
+            self.update(value, t)
+            self.discard(t)
         return self.output()
 
     def update(self, value, t):
-        if np.isnan(value):
-            return
         self.values = np.concatenate([np.array([value]), self.values])
         self.times = np.concatenate([np.array([t]), self.times])
 
@@ -136,8 +183,8 @@ class Buffer(object):
         self.values = np.reshape(self.values[pixel_mask_broadcast], [np.sum(pixel_mask), 2])
         self.times = self.times[pixel_mask]
 
-    def count_nans(self, points):
-        return np.sum(~np.isnan(np.mean(points, axis=1)))
+    # def count_nans(self, points):
+    #     return np.sum(~np.isnan(np.mean(points, axis=1)))
 
     def output(self):
         if self.values.shape[0] == 0:
@@ -162,8 +209,9 @@ class Buffers(object):
 
 
 class GeometryCheck(object):
-    def __init__(self, distance_delta_max):
+    def __init__(self, distance_delta_max, points_min):
         self.distance_delta_max = distance_delta_max
+        self.points_min = points_min
         self.distance_true = np.array([
             [0, 0.03, 0.07, 0.16, 0.28],
             [0.03, 0, 0.04, 0.13, 0.25],
@@ -172,17 +220,49 @@ class GeometryCheck(object):
             [0.28, 0.25, 0.21, 0.12, 0],
             ])
         
+
     def __call__(self, points_3d):
-        distance_pred = np.linalg.norm(points_3d[None, :, :] - points_3d[:, None, :], axis=-1)
+        masks = combination_masks(5, self.points_min)
+        for mask in masks:
+            points_3d_ = self.single(points_3d, mask)
+            if self.count_notnans(points_3d_) >= self.points_min:
+                return points_3d_
+        points_3d_[...] = np.nan
+        return points_3d_
+        
+
+    def single(self, points_3d, mask):
         points_3d_ = np.copy(points_3d)
-        # mask = np.abs(distance_pred - self.distance_true) < self.distance_delta_max
+        for i in range(mask.shape[0]):
+            if not mask[i]:
+                points_3d_[i, :] = np.nan
 
-        # idx = np.argmax(np.sum(mask, axis=0))
+        if self.count_notnans(points_3d_) < self.points_min:
+            points_3d_[...] = np.nan
 
-        if np.nanmax(distance_pred) < self.distance_delta_max:
+        distance_pred = np.linalg.norm(points_3d_[None, :, :] - points_3d_[:, None, :], axis=-1)
+        distance_delta = np.abs(distance_pred - self.distance_true)
+
+        if np.nanmax(distance_delta) > self.distance_delta_max:
             points_3d_[...] = np.nan
 
         return points_3d_
+        
+    # def __call__(self, points_3d):
+    #     distance_pred = np.linalg.norm(points_3d[None, :, :] - points_3d[:, None, :], axis=-1)
+    #     distance_delta = np.abs(distance_pred - self.distance_true)
+    #     points_3d_ = np.copy(points_3d)
+    #     # mask = np.abs(distance_pred - self.distance_true) < self.distance_delta_max
+
+    #     # idx = np.argmax(np.sum(mask, axis=0))
+
+    #     if np.nanmax(distance_delta) > self.distance_delta_max:
+    #         points_3d_[...] = np.nan
+
+    #     return points_3d_
+    
+    def count_notnans(self, points):
+        return np.sum(~np.isnan(np.mean(points, axis=1)))
 
 
 class DistanceCheck(object):
