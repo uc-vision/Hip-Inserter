@@ -12,9 +12,6 @@ def reduce_to_nonan_array(array):
     return array_sub
 
 
-# def number_to_bool_array(number):
-
-
 def combination_masks(num_bools, min_true):
     masks = []
     for i in range(num_bools, min_true-1, -1):
@@ -25,11 +22,14 @@ def combination_masks(num_bools, min_true):
                 mask[k] = int(b[k])
             if np.sum(mask) == i:
                 masks.append(mask)
-    # masks = np.stack(masks, axis=0)
     return masks
 
-# if __name__ == "__main__":
-#     combination_masks(5, 3)
+def closest_point_vector(q, v1, v2):
+    ''' calculate interpolated 't' value along vector between points v1 and v2 '''
+    n = (v1[0] - q[:, 0])*(v2[0] - v1[0]) + (v1[1] - q[:, 1])*(v2[1] - v1[1]) + (v1[2] - q[:, 2])*(v2[2] - v1[2])
+    d = (v2[0] - v1[0])**2 + (v2[1] - v1[1])**2 + (v2[2] - v1[2])**2
+    t = -n / d
+    return t
 
 
 class HorozontalCheck(object):
@@ -88,24 +88,6 @@ class PrincipleAxisVarCheck(object):
                 return points_
         points_[...] = np.nan
         return points_
-
-    # def __call__(self, points):
-    #     points_ = np.copy(points)
-
-    #     if self.count_notnans(points_) < self.points_min:
-    #         points_[...] = np.nan
-    #         return points_
-        
-    #     points_sub = reduce_to_nonan_array(points_)
-
-    #     pca = decomposition.PCA(2)
-    #     pca.fit(points_sub)
-
-    #     if pca.explained_variance_ratio_[1] > self.var_max:
-    #         points_[...] = np.nan
-    #         return points_
-        
-    #     return points_
 
     def both(self, points_left, points_right):
         points_left_ = self(points_left)
@@ -183,9 +165,6 @@ class Buffer(object):
         self.values = np.reshape(self.values[pixel_mask_broadcast], [np.sum(pixel_mask), 2])
         self.times = self.times[pixel_mask]
 
-    # def count_nans(self, points):
-    #     return np.sum(~np.isnan(np.mean(points, axis=1)))
-
     def output(self):
         if self.values.shape[0] == 0:
             output = np.zeros([1, 2])
@@ -247,19 +226,6 @@ class GeometryCheck(object):
             points_3d_[...] = np.nan
 
         return points_3d_
-        
-    # def __call__(self, points_3d):
-    #     distance_pred = np.linalg.norm(points_3d[None, :, :] - points_3d[:, None, :], axis=-1)
-    #     distance_delta = np.abs(distance_pred - self.distance_true)
-    #     points_3d_ = np.copy(points_3d)
-    #     # mask = np.abs(distance_pred - self.distance_true) < self.distance_delta_max
-
-    #     # idx = np.argmax(np.sum(mask, axis=0))
-
-    #     if np.nanmax(distance_delta) > self.distance_delta_max:
-    #         points_3d_[...] = np.nan
-
-    #     return points_3d_
     
     def count_notnans(self, points):
         return np.sum(~np.isnan(np.mean(points, axis=1)))
@@ -284,14 +250,12 @@ class Points2Vector(object):
         self.vector = np.zeros([3])
         self.vector[...] = np.nan
         self.current = False
-        # self.current_once = False
 
     def __call__(self, points_3d):
         if np.isnan(points_3d).all():
             self.current = False
         else:
             self.current = True
-            # self.current_once = True
             self.update(points_3d)
         return self.get_vector()
 
@@ -300,14 +264,20 @@ class Points2Vector(object):
         pca = decomposition.PCA(3)
         pca.fit(points_3d_sub)
 
-        self.vector = -np.copy(pca.components_[0])
-        self.mean = np.copy(pca.mean_)
+        mean = np.copy(pca.mean_)
+        vector = -np.copy(pca.components_[0])
+
+        ord = closest_point_vector(points_3d_sub, mean, mean + vector)
+        if ord[0] < ord[-1]:
+            vector = -vector
+
+        self.vector = vector
+        self.mean = mean
 
     def get_vector(self):
         return self.mean, self.vector
     
     def get_current(self):
-        # return self.current, self.current_once
         return self.current
     
 
