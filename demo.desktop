@@ -4,4 +4,4 @@ Version=1.0
 Type=Application
 Terminal=true
 Exec=/home/casey/Projects/docker_mount/Hip-Inserter/demo_docker.sh
-Name=Hip-Inserter Demo
+Name=Demo

@@ -15,7 +15,7 @@ Run the following install commands inside the docker container.
 
 `apt-get install python3-pyqt5`
 
-`python3 -m pip install tensorflow[and-cuda]`
+`python3 -m pip install tensorflow[and-cuda]==2.8.4`
 
 `python3 -m pip install sleap[pypi]==1.3.3`
 
@@ -33,7 +33,7 @@ Run the following install commands inside the docker container.
 
 ### Setup Desktop
 
-`cp ./desktop.demo ~/Desktop/demo.desktop`
+`cp ./demo.desktop ~/Desktop/demo.desktop`
 
 `chmod +x ~/Desktop/demo.desktop`
 

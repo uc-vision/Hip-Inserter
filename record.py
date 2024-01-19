@@ -33,7 +33,7 @@ def record(dirpath_root, num_seconds):
     filepath_left = os.path.join(dirpath_record, "left.mp4")
     filepath_right = os.path.join(dirpath_record, "right.mp4")
 
-    fourcc = cv2.VideoWriter_fourcc(*'h264')
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     cap_left = cv2.VideoWriter(filepath_left, fourcc, 30.0, (1280, 720))
     cap_right = cv2.VideoWriter(filepath_right, fourcc, 30.0, (1280, 720))
 
