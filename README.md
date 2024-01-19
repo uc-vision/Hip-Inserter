@@ -4,76 +4,37 @@ The goal of this project is to estimate the angles/orientation of a orthopaedic 
 ![Angle Estimation](./images/intro.gif)
 
 ## Install
-To install this project we recommend creating a conda enviroment. 
+To install this project we recommend using using the following docker container and flags. 
 
-Note: To avoid dependencies version issues, use the installation order provided below.
+`docker run --gpus all -it --name hip-inserter --privileged --ipc=host -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --mount type=bind,source=/home/user/Documents/docker_mount,target=/mnt stereolabs/zed:4.0-gl-devel-cuda11.4-ubuntu20.04`
 
-### Operating System
-These instructions are tested, and assume the Ubuntu 22.04 operating system.
+### Docker Container
+Run the following install commands inside the docker container.
 
-### Nvidia Driver
-The following cuda version pairs with the NVIDIA Driver 535. Install with the following command
+`apt-get update`
 
-`sudo apt install nvidia-driver-535`
+`apt-get install python3-pyqt5`
 
-### CUDA
-CUDA is required to operate the ZED camera, and the run this project in realtime. We recommend [CUDA 12.2](https://developer.nvidia.com/cuda-12-2-0-download-archive)
+`python3 -m pip install tensorflow[and-cuda]`
 
-### SLEAP
-SLEAP is a full framework for labeling, training, and infering pose of animals via keypoint detection. We we are not working with animals, we find that this works as a general keypoint detector, while being easy to work with. The following link provides instructions on using this framework [SLEAP](https://sleap.ai/)
+`python3 -m pip install sleap[pypi]==1.3.3`
 
-`conda create -y -n hipinserter -c conda-forge -c nvidia -c sleap -c anaconda sleap=1.3.3`
+`python3 -m pip install hydra-core tqdm`
 
-`conda activate hipinserter`
+`python3 /usr/local/zed/get_python_api.py`
 
-### ZED
-We use the ZED Camera and it's SDK (version 3.8) for this project. Instructions for installing this can be found [here](https://www.stereolabs.com/developers/release/)
 
-The python bindings can then be installed with the following line
+### Run Docker
 
-`python /usr/local/zed/get_python_api.py`
+`chmod +x ./demo_docker.sh`
 
-### Other Dependencies
+`./demo_docker.sh`
 
-`pip install -r requirements.txt`
 
-## Pipeline
-Here we describe a basic overview of our pipeline. Each step is modular, so addition processing can be added between any of these steps.
+### Setup Desktop
 
-### Image Retreival
-First step we retreive the left and right images from our stereo camera.
+`cp ./desktop.demo ~/Desktop/demo.desktop`
 
-### Keypoint Detection
-Next we detect the pixel coordinates of keypoints in both images
+`chmod +x ~/Desktop/demo.desktop`
 
-### Camera to World Projection
-Using stereo camera principles we use our horizontal disparity between left and right images to transfrom pixel coordinates into world coordinates.
-
-A more detailed overview of these concepts can be found [here](https://web.stanford.edu/class/cs231a/course_notes/). (This is what I used to wrap my head around these concepts, so highly recommended)
-
-## Visualisers
-Visualers in this project are not apart of the main pipeline, but serve to demonstrate various aspects of the project.
-
-Note: These are run off the main thread to minimise performance impact on the main pipeline
-
-### DrawPoints
-Draw the detected keypoints in left and right images, and the the correspondace via a line, useful to demonstrate disparity.
-
-![Draw Points](./images/draw_points.png)
-
-### DrawLine
-Draw the detected keypoints on one image, and superimpose a line over the inserter.
-
-![Draw Line](./images/draw_line.png)
-
-### DrawAngle
-Output the roll and pitch angles of the inserter.
-
-![Draw Angle](./images/draw_angles.png)
-
-### 3D Visualizer
-Note: Currently not working on auxiliary threads (Don't use)
-
-Render the hip inserter as a bar in a virtual 3D enviroment
-
-![3D Visualization](./images/3d.png)
+`gio set ~/Desktop/demo.desktop metadata::trusted true`

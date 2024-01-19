@@ -2,70 +2,68 @@ import numpy as np
 import cv2
 import os
 import json
-# import pyzed.sl as sl
+import pyzed.sl as sl
 
 from time import time
 
 
-# class Camera(object):
-#     def __init__(self):
-#         self.zed = sl.Camera()
+class Camera(object):
+    def __init__(self):
+        self.zed = sl.Camera()
 
-#         # Create a InitParameters object and set configuration parameters
-#         self.init_params = sl.InitParameters()
-#         self.init_params.depth_mode = sl.DEPTH_MODE.PERFORMANCE  # Use PERFORMANCE depth mode
-#         self.init_params.coordinate_units = sl.UNIT.METER  # Use meter units (for depth measurements)
-#         self.init_params.camera_resolution = sl.RESOLUTION.HD720
-#         self.init_params.camera_fps = 30
+        # Create a InitParameters object and set configuration parameters
+        self.init_params = sl.InitParameters()
+        self.init_params.depth_mode = sl.DEPTH_MODE.PERFORMANCE  # Use PERFORMANCE depth mode
+        self.init_params.coordinate_units = sl.UNIT.METER  # Use meter units (for depth measurements)
+        self.init_params.camera_resolution = sl.RESOLUTION.HD720
+        self.init_params.camera_fps = 30
 
-#         self.fps = 30
+        self.fps = 30
 
-#         # Open the camera
-#         err = self.zed.open(self.init_params)
-#         if err != sl.ERROR_CODE.SUCCESS:
-#             exit(1)
+        # Open the camera
+        err = self.zed.open(self.init_params)
+        if err != sl.ERROR_CODE.SUCCESS:
+            exit(1)
 
-#         self.runtime_parameters = sl.RuntimeParameters()
+        self.runtime_parameters = sl.RuntimeParameters()
 
-#         self.image_left = sl.Mat()
-#         self.image_right = sl.Mat()
+        self.image_left = sl.Mat()
+        self.image_right = sl.Mat()
 
-#         info = self.zed.get_camera_information()
-#         left_cam = info.camera_configuration.calibration_parameters.left_cam
-#         self.intrinsics = np.eye(3)
-#         self.intrinsics[0, 0] = left_cam.fx
-#         self.intrinsics[1, 1] = left_cam.fy
-#         self.intrinsics[0, 2] = left_cam.cx
-#         self.intrinsics[1, 2] = left_cam.cy
+        info = self.zed.get_camera_information()
+        left_cam = info.camera_configuration.calibration_parameters.left_cam
+        self.intrinsics = np.eye(3)
+        self.intrinsics[0, 0] = left_cam.fx
+        self.intrinsics[1, 1] = left_cam.fy
+        self.intrinsics[0, 2] = left_cam.cx
+        self.intrinsics[1, 2] = left_cam.cy
 
-#         self.baseline = self.zed.get_camera_information().camera_configuration.calibration_parameters.stereo_transform[0, 3]
+        self.baseline = self.zed.get_camera_information().camera_configuration.calibration_parameters.stereo_transform[0, 3]
 
-#         self.t0 = time()
-#         self.iter = 0
+        self.t0 = time()
+        self.iter = 0
 
-#     def __call__(self):
-#         if self.zed.grab(self.runtime_parameters) == sl.ERROR_CODE.SUCCESS:
-#             self.zed.retrieve_image(self.image_left, sl.VIEW.LEFT)
-#             self.zed.retrieve_image(self.image_right, sl.VIEW.RIGHT)
+    def __call__(self):
+        if self.zed.grab(self.runtime_parameters) == sl.ERROR_CODE.SUCCESS:
+            self.zed.retrieve_image(self.image_left, sl.VIEW.LEFT)
+            self.zed.retrieve_image(self.image_right, sl.VIEW.RIGHT)
 
-#             image_left_np = cv2.cvtColor(self.image_left.get_data()[:, :, :3], cv2.COLOR_RGB2BGR)
-#             image_right_np = cv2.cvtColor(self.image_right.get_data()[:, :, :3], cv2.COLOR_RGB2BGR)
+            image_left_np = cv2.cvtColor(self.image_left.get_data()[:, :, :3], cv2.COLOR_RGB2BGR)
+            image_right_np = cv2.cvtColor(self.image_right.get_data()[:, :, :3], cv2.COLOR_RGB2BGR)
 
-#             image_left_np = np.ascontiguousarray(image_left_np)
-#             image_right_np = np.ascontiguousarray(image_right_np)
+            image_left_np = np.ascontiguousarray(image_left_np)
+            image_right_np = np.ascontiguousarray(image_right_np)
 
-#             self.iter += 1
+            self.iter += 1
 
-#             return image_left_np, image_right_np
+            return image_left_np, image_right_np
         
-#     def get_time(self):
-#         return time() - self.t0
+    def get_time(self):
+        return time() - self.t0
         
 
 class Recording(object):
     def __init__(self, dirpath, fps=30):
-
-        # self.fps = 30
 
         left_filepath = os.path.join(dirpath, "left.mp4")
         self.left_cap = cv2.VideoCapture(left_filepath)

@@ -9,17 +9,17 @@ hydra:
     dir: .
 
 
-model_filepath: "/home/casey/Projects/Hip-Inserter/models/sleap_projects/models/7-points-3230831_174033.single_instance.n=300"
+model_filepath: "/mnt/Hip-Inserter/models/sleap_projects/models/7-points-3230831_174033.single_instance.n=300"
 
 # camera: True
 # camera: "/home/casey/Projects/Hip-Inserter/data/collection/20231231_191639"
 # camera: "/home/casey/Projects/Hip-Inserter/data/collection/20231231_191742"
-# camera: "/home/casey/Projects/Hip-Inserter/data/collection/20231231_191825"
+# camera: "/mnt/Hip-Inserter/data/collection/20231231_191825"
 
 # camera: "/home/casey/Projects/Hip-Inserter/data/collection/20240107_183340"
 # camera: "/home/casey/Projects/Hip-Inserter/data/collection/20240107_183449"
-camera: "/home/casey/Projects/Hip-Inserter/data/collection/20240107_183609"
-# camera: "/home/casey/Projects/Hip-Inserter/data/collection/20240107_183743"
+# camera: "/home/casey/Projects/Hip-Inserter/data/collection/20240107_183609"
+camera: "/mnt/Hip-Inserter/data/collection/20240107_183743"
 # camera: "/home/casey/Projects/Hip-Inserter/data/collection/20240107_183830"
 # camera: "/home/casey/Projects/Hip-Inserter/data/collection/20240107_183916"
 # camera: "/home/casey/Projects/Hip-Inserter/data/collection/20240107_183955"
@@ -55,17 +55,17 @@ draw_vector:
   n_points: 500
 
 show_output: True
-# record_output: "/home/casey/Videos/output_test.mp4"
 record:
+  output: null
   # output: "/home/casey/Projects/Hip-Inserter/analysis/outputs/20231231_191639/output_final.mp4"
   # output: "/home/casey/Projects/Hip-Inserter/analysis/outputs/20231231_191742/output_final.mp4"
   # output: "/home/casey/Projects/Hip-Inserter/analysis/outputs/20231231_191825/output_final.mp4"
   
   # output: "/home/casey/Projects/Hip-Inserter/analysis/outputs/20240107_183340/output_final.mp4"
   # output: "/home/casey/Projects/Hip-Inserter/analysis/outputs/20240107_183449/output_final.mp4"
-  output: "/home/casey/Projects/Hip-Inserter/analysis/outputs/20240107_183609/output_final.mp4"
+  # output: "/home/casey/Projects/Hip-Inserter/analysis/outputs/20240107_183609/output_final.mp4"
   # output: "/home/casey/Projects/Hip-Inserter/analysis/outputs/20240107_183743/output_final.mp4"
   # output: "/home/casey/Projects/Hip-Inserter/analysis/outputs/20240107_183830/output_final.mp4"
   # output: "/home/casey/Projects/Hip-Inserter/analysis/outputs/20240107_183916/output_final.mp4"
   # output: "/home/casey/Projects/Hip-Inserter/analysis/outputs/20240107_183955/output_final.mp4"
-  fps: 10
+  fps: 20
