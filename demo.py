@@ -18,7 +18,7 @@ from processing import DepthEstimate
 
 from visualise import DrawVector, DrawDepth, DrawValues
 
-from camera import Recording
+from camera import Camera, Recording
 from inference import Inference
 from transforms import Project, roll_pitch_angles
 
@@ -27,7 +27,7 @@ from transforms import Project, roll_pitch_angles
 def run(cfg):
 
     if cfg.camera is True:
-        pass
+        camera = Camera()
     else:
         camera = Recording(cfg.camera)
     inference = Inference(cfg.model_filepath)
@@ -69,8 +69,10 @@ def run(cfg):
     draw_values = DrawValues()
 
     if cfg.record.output is not None:
-        fourcc = cv2.VideoWriter_fourcc(*'h264')
-        cap = cv2.VideoWriter(cfg.record.output, fourcc, cfg.record.fps, (1280+360, 720))
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        cap = cv2.VideoWriter(cfg.record.output, fourcc, cfg.record.fps, (1280+480, 720))
+
+    t = camera.get_time()
 
     while True:
         # Images and time from camera

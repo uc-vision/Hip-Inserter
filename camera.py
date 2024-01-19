@@ -23,6 +23,7 @@ class Camera(object):
         # Open the camera
         err = self.zed.open(self.init_params)
         if err != sl.ERROR_CODE.SUCCESS:
+            print("Could not connect to camera...")
             exit(1)
 
         self.runtime_parameters = sl.RuntimeParameters()

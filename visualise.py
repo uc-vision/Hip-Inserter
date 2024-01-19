@@ -67,8 +67,8 @@ class DrawValues(object):
         return image_values
 
     def draw_angles(self, roll, pitch, current):
-        image_roll = np.ones((240, 360, 3), dtype=np.uint8) * 255
-        image_pitch = np.ones((240, 360, 3), dtype=np.uint8) * 255
+        image_roll = np.ones((240, 480, 3), dtype=np.uint8) * 255
+        image_pitch = np.ones((240, 480, 3), dtype=np.uint8) * 255
 
         if np.isnan(roll).any() or np.isnan(pitch).any():
             return image_roll, image_pitch
@@ -99,7 +99,7 @@ class DrawValues(object):
         return image_roll, image_pitch
     
     def draw_depth(self, depth, current):
-        image_depth = np.ones((240, 360, 3), dtype=np.uint8) * 255
+        image_depth = np.ones((240, 480, 3), dtype=np.uint8) * 255
 
         if np.isnan(depth).any():
             return image_depth
@@ -113,7 +113,7 @@ class DrawValues(object):
             text=f"d: {round(depth, 3)}",
             org=(10,200),
             fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-            fontScale=2.5,
+            fontScale=3,
             color=color,
             thickness=8,
             bottomLeftOrigin=False)
