@@ -38,7 +38,7 @@ def roll_pitch_angles(vector):
     vector_norm = vector / np.linalg.norm(vector)
     X, Y, Z = vector_norm[0], -vector_norm[1], vector_norm[2]
     roll = np.arctan2(X, Y)
-    pitch = np.arctan2(Z, (Y**2 + X**2)**0.5)
+    pitch = np.arctan2(Z, Y)
     return np.rad2deg(roll), np.rad2deg(pitch)
 
 
